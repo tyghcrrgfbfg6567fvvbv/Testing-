@@ -1,0 +1,901 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK HACKER - Elite Cyber Operations</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow-x: hidden;
+            position: relative;
+            line-height: 1.6;
+        }
+
+        /* Matrix Background */
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        /* Terminal Cursor Blink */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+            color: #00ff00;
+        }
+
+        /* Navigation */
+        .nav-container {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        .terminal-container {
+            min-height: 100vh;
+            padding: 80px 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .terminal-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            background: rgba(0, 255, 0, 0.05);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            animation: scanline 3s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .terminal-title {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px #00ff00;
+            letter-spacing: 2px;
+        }
+
+        .terminal-subtitle {
+            color: #00cc00;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .terminal-prompt {
+            color: #00cc00;
+            font-weight: bold;
+        }
+
+        /* Profile Section */
+        .profile-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 50px;
+            animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .profile-image {
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .profile-image img {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        .profile-info {
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-info::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+        }
+
+        .profile-info h2 {
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-label {
+            color: #00cc00;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .info-value {
+            color: #00ff88;
+        }
+
+        .skills-container {
+            margin-top: 20px;
+        }
+
+        .skills-title {
+            color: #00ff00;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .skills-marquee {
+            background: rgba(0, 30, 0, 0.8);
+            padding: 10px;
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .skills-marquee marquee {
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        /* Websites Section */
+        .websites-section {
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 50px;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 1s ease 0.3s both;
+        }
+
+        .websites-section h2 {
+            color: #00ff00;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        .websites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .website-card {
+            background: rgba(0, 30, 0, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .website-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+        }
+
+        .website-card h3 {
+            color: #00ff00;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .website-card p {
+            color: #00cc66;
+            margin-bottom: 15px;
+        }
+
+        .website-link {
+            display: inline-block;
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            padding: 8px 16px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .website-link:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        /* Social Media Section */
+        .social-section {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInUp 1s ease 0.6s both;
+        }
+
+        .social-section h2 {
+            color: #00ff00;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .social-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-icon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 255, 0, 0.1);
+            transform: scale(0);
+            transition: transform 0.3s ease;
+            border-radius: 50%;
+        }
+
+        .social-icon:hover::before {
+            transform: scale(1);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-5px) rotate(5deg);
+            box-shadow: 0 10px 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .instagram { border-color: #E4405F; color: #E4405F; }
+        .github { border-color: #333; color: #fff; }
+        .whatsapp { border-color: #25D366; color: #25D366; }
+        .twitter { border-color: #1DA1F2; color: #1DA1F2; }
+
+        /* Repositories Section */
+        .repos-section {
+            margin-top: 60px;
+            animation: fadeInUp 1s ease 0.9s both;
+        }
+
+        .repos-section h2 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .repos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .repo-card {
+            background: rgba(0, 20, 0, 0.8);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .repo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+        }
+
+        .repo-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff00, transparent);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .repo-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        .repo-name {
+            color: #00ff00;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .repo-description {
+            color: #00cc66;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .repo-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            color: #00aa44;
+            font-size: 0.9rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .repo-link {
+            display: inline-block;
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            font-weight: bold;
+        }
+
+        .repo-link:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .repo-language {
+            display: inline-block;
+            background: rgba(0, 255, 0, 0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #00ff88;
+            margin-top: 10px;
+        }
+
+        /* Loading and Error States */
+        .loading, .error {
+            text-align: center;
+            padding: 50px;
+            color: #00ff00;
+            font-size: 1.2rem;
+        }
+
+        .error {
+            color: #ff0000;
+        }
+
+        /* Footer */
+        .terminal-footer {
+            text-align: center;
+            padding: 30px;
+            color: #00cc00;
+            border-top: 1px solid rgba(0, 255, 0, 0.3);
+            font-size: 0.9rem;
+        }
+
+        /* Scroll Animations */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .profile-section {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+
+            .terminal-title {
+                font-size: 2rem;
+            }
+
+            .nav-container {
+                top: 10px;
+                left: 10px;
+            }
+
+            .nav-btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+
+            .repos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glitch Effect */
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+
+        .glitch-text:hover {
+            animation: glitch 0.3s linear infinite;
+        }
+
+        /* Scan Lines Effect */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.3;
+        }
+
+        /* CRT Effect */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 999;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.27861; }
+            5% { opacity: 0.34769; }
+            10% { opacity: 0.23604; }
+            15% { opacity: 0.90626; }
+            20% { opacity: 0.18128; }
+            25% { opacity: 0.83891; }
+            30% { opacity: 0.65583; }
+            35% { opacity: 0.67807; }
+            40% { opacity: 0.26559; }
+            45% { opacity: 0.84693; }
+            50% { opacity: 0.96019; }
+            55% { opacity: 0.08594; }
+            60% { opacity: 0.20313; }
+            65% { opacity: 0.71988; }
+            70% { opacity: 0.53455; }
+            75% { opacity: 0.37288; }
+            80% { opacity: 0.71428; }
+            85% { opacity: 0.70419; }
+            90% { opacity: 0.7003; }
+            95% { opacity: 0.36108; }
+            100% { opacity: 0.24387; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Matrix Background -->
+    <canvas id="matrixCanvas"></canvas>
+    
+    <!-- Scan Lines Effect -->
+    <div class="scanlines"></div>
+    
+    <!-- Navigation -->
+    <div class="nav-container">
+        <button class="nav-btn" onclick="showProfile()">
+            <i class="fas fa-user"></i> PROFILE
+        </button>
+        <button class="nav-btn" onclick="showRepositories()">
+            <i class="fas fa-code-branch"></i> REPOSITORIES
+        </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <h1 class="terminal-title glitch-text">DARK HACKER</h1>
+            <p class="terminal-subtitle">Elite Cyber Operations Division</p>
+            <div class="terminal-prompt">
+                root@dark-hacker:~$ <span class="cursor">█</span>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profileSection" class="scroll-animate">
+            <div class="profile-section">
+                <div class="profile-image">
+                    <img src="https://i.ibb.co/ncwxxSY/IMG-20240125-004557-photoaidcom-cropped.png" alt="DARK HACKER">
+                </div>
+                <div class="profile-info">
+                    <h2>SYSTEM PROFILE</h2>
+                    <div class="info-grid">
+                        <div class="info-label">NAME:</div>
+                        <div class="info-value">Risov Kemprai</div>
+                        
+                        <div class="info-label">ROLE:</div>
+                        <div class="info-value">Cyber Security Specialist</div>
+                        
+                        <div class="info-label">LOCATION:</div>
+                        <div class="info-value">India, Assam</div>
+                        
+                        <div class="info-label">EMAIL:</div>
+                        <div class="info-value">risov700k@gmail.com</div>
+                        
+                        <div class="info-label">HOBBIES:</div>
+                        <div class="info-value">Game Hacking, Penetration Testing</div>
+                    </div>
+                    
+                    <div class="skills-container">
+                        <h3 class="skills-title">CURRENT SKILLSET:</h3>
+                        <div class="skills-marquee">
+                            <marquee scrollamount="8" direction="left">
+                                PHP • HTML • CSS • Java • C++ • Node.js • Bash • Python • SQL • JavaScript • React • Ethical Hacking • Network Security
+                            </marquee>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Websites Section -->
+            <div class="websites-section">
+                <h2>OPERATIONAL ASSETS</h2>
+                <div class="websites-grid">
+                    <div class="website-card">
+                        <h3><i class="fas fa-blog"></i> BLOG</h3>
+                        <p>Access exclusive cybersecurity tutorials and hacking techniques</p>
+                        <a href="https://mr-risov.github.io/blog" target="_blank" class="website-link">
+                            <i class="fas fa-external-link-alt"></i> ACCESS PORTAL
+                        </a>
+                    </div>
+                    <div class="website-card">
+                        <h3><i class="fas fa-store"></i> STORE</h3>
+                        <p>Procure advanced hacking tools and security software</p>
+                        <a href="https://mr-risov.github.io/flysian-Store" target="_blank" class="website-link">
+                            <i class="fas fa-external-link-alt"></i> ENTER STORE
+                        </a>
+                    </div>
+                    <div class="website-card">
+                        <h3><i class="fas fa-users"></i> PANEL</h3>
+                        <p>Social media engagement and follower acquisition services</p>
+                        <a href="https://mr-risov.github.io/socialservices/" target="_blank" class="website-link">
+                            <i class="fas fa-external-link-alt"></i> LAUNCH PANEL
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="social-section">
+                <h2>SECURE COMMUNICATION CHANNELS</h2>
+                <div class="social-icons">
+                    <a href="https://instagram.com/risov_kemprai" class="social-icon instagram" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://github.com/mr-risov" class="social-icon github" target="_blank">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://wa.me/+918822308081" class="social-icon whatsapp" target="_blank">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="https://twitter.com/MrRisov" class="social-icon twitter" target="_blank">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Repositories Section -->
+        <div id="reposSection" class="repos-section scroll-animate" style="display: none;">
+            <h2>CODE REPOSITORY ACCESS</h2>
+            <div class="repos-grid" id="repoContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> INITIALIZING REPOSITORY SCAN...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="terminal-footer">
+        <p>© 2024 DARK HACKER | SYSTEM SECURITY LEVEL: MAXIMUM | ACCESS GRANTED</p>
+        <p>root@dark-hacker:~$ <span class="cursor">█</span></p>
+    </div>
+
+    <script>
+        // Matrix Background Effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*";
+        const charArray = chars.split('');
+
+        const fontSize = 14;
+        const columns = Math.floor(canvas.width / fontSize);
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * canvas.height / fontSize);
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00';
+            ctx.font = `${fontSize}px 'Courier New'`;
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 33);
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Navigation Functions
+        function showProfile() {
+            document.getElementById('profileSection').style.display = 'block';
+            document.getElementById('reposSection').style.display = 'none';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showRepositories() {
+            document.getElementById('profileSection').style.display = 'none';
+            document.getElementById('reposSection').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            fetchGitHubRepos();
+        }
+
+        // Fetch GitHub Repositories
+        async function fetchGitHubRepos() {
+            const username = "mr-risov";
+            const repoContainer = document.getElementById("repoContainer");
+            
+            try {
+                repoContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> SCANNING REPOSITORIES...</div>';
+                
+                const response = await fetch(`https://api.github.com/users/${username}/repos?sort=updated&direction=desc&per_page=12`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const repos = await response.json();
+                
+                if (repos.length === 0) {
+                    repoContainer.innerHTML = '<div class="error"><i class="fas fa-exclamation-circle"></i> NO REPOSITORIES FOUND</div>';
+                    return;
+                }
+                
+                repoContainer.innerHTML = '';
+                
+                repos.forEach(repo => {
+                    const repoElement = document.createElement("div");
+                    repoElement.classList.add("repo-card");
+                    
+                    const language = repo.language || 'Unknown';
+                    const stars = repo.stargazers_count || 0;
+                    const forks = repo.forks_count || 0;
+                    
+                    repoElement.innerHTML = `
+                        <h3 class="repo-name">
+                            <i class="fas fa-folder"></i> ${repo.name}
+                        </h3>
+                        <p class="repo-description">${repo.description ? repo.description : 'No description available'}</p>
+                        <div class="repo-stats">
+                            <div class="stat">
+                                <i class="fas fa-star"></i> ${stars}
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-code-branch"></i> ${forks}
+                            </div>
+                            <div class="stat">
+                                <i class="fas fa-circle"></i> ${language}
+                            </div>
+                        </div>
+                        <a href="${repo.html_url}" target="_blank" class="repo-link">
+                            <i class="fas fa-external-link-alt"></i> ACCESS REPOSITORY
+                        </a>
+                        ${repo.language ? `<div class="repo-language">${repo.language}</div>` : ''}
+                    `;
+                    repoContainer.appendChild(repoElement);
+                });
+                
+            } catch (error) {
+                console.error('Error fetching repositories:', error);
+                repoContainer.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-exclamation-triangle"></i> REPOSITORY SCAN FAILED: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Scroll Animation
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.scroll-animate');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', animateOnScroll);
+        window.addEventListener('load', animateOnScroll);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show profile by default
+            showProfile();
+            
+            // Add some delay for better loading experience
+            setTimeout(() => {
+                animateOnScroll();
+            }, 500);
+        });
+
+        // Add glitch effect to interactive elements
+        document.querySelectorAll('.nav-btn, .website-link, .repo-link').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
